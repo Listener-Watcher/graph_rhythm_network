@@ -152,7 +152,7 @@ def train1(args, split):
 
 
 def run_splits(config,args):
-    n_splits = 1
+    n_splits = args.split
     best_results = []
     best_val_results = []
     for split in range(n_splits-1,n_splits):
@@ -165,7 +165,7 @@ def run_splits(config,args):
     best_val_results = np.array(best_val_results)
     mean_val_acc = np.mean(best_val_results)
     std = np.std(best_results)
-    metric = {"acc_val":mean_val_acc}
+    metric = {"acc_val":mean_val_acc,"acc":mean_acc}
     train.report(metric)
     log = 'Final test results -- mean: {:.4f}, std: {:.4f}'
     print(log.format(mean_acc,std))
@@ -196,9 +196,11 @@ if __name__ == '__main__':
     parser.add_argument('--use_val_acc', type=bool, default=True,
                         help='use validation accuracy for early stoppping -- otherwise use validation loss')
     parser.add_argument('--use_G2_conv', type=bool, default=True,
-                        help='use a different GNN model for the gradient gating method')
+                        help='use a different GNN model for computing measure')
     parser.add_argument('--device', type=str, default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
                         help='computing device')
+    parser.add_argument('--split', type=int, default=1),
+                        help='data split')
     args = parser.parse_args()
 
     # n_splits = 2
@@ -222,10 +224,10 @@ if __name__ == '__main__':
     "dropout":tune.uniform(0,0.9),
     "weight_decay":tune.loguniform(1e-8,1e-2),
     "G2_exp":tune.uniform(1,5),
-    #"nlayers":tune.randint(lower=5,upper=31) # 5 to 30
-    "nlayers":tune.choice([5,10,15])
+    "nlayers":tune.randint(lower=1,upper=61)
+    #"nlayers":tune.choice([5,10,15])
     }
-    result = tune.run(partial(run_splits,args=args),config=config,resources_per_trial={"cpu": 1, "gpu": 1},metric="acc_val",
+    result = tune.run(partial(run_splits,args=args),config=config,resources_per_trial={"cpu": 4, "gpu": 4},metric="acc_val",
     mode="max",num_samples=20)
-    best_trial = result.get_best_trial("acc_val", "max", "last")
+    best_trial = result.get_best_trial("acc", "max", "last")
     print(f"Best trial config: {best_trial.config}")
