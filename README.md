@@ -24,7 +24,10 @@ pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.9.0+c
 pip install torch-geometric
 pip install scipy
 pip install numpy
+pip install -U "ray[data,train,tune,serve]"
+
 ```
+Ray tune is required for hyper parameter searching.
 ### Notes
 Models.py is equivalent to the 1 head version of Models_Multi_head.py.<br />
 The GCN parameter is fixed for each layer followed by Gradient-gating's original code, but it is always changable for defining different GCN layer for each layer. The pervious type is normally treated in the implitict Graph neural network.<br />
