@@ -25,3 +25,4 @@ pip install torch-geometric
 pip install scipy
 pip install numpy
 ```
+Models.py is equivalent to the 1 head version of Models_Multi_head.py.
